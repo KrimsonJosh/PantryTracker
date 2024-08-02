@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Button, Modal, TextField, Stack} from '@mui/material';
+import { Box, Typography, Button, Modal, TextField, Stack } from '@mui/material';
 import { firestore } from './firebase'; // Ensure this path is correct
 
 import {
@@ -14,7 +14,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 
-const style = {
+const modalStyle = {
   position: 'absolute',
   top: '50%',
   left: '50%',
@@ -44,59 +44,53 @@ export default function Home() {
     setInventory(inventoryList);
     console.log(inventoryList);
   };
+
   const addItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
-    const docSnap = await getDoc(docRef)
+    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data()
-      await setDoc(docRef, { quantity: quantity + 1 })
+      const { quantity } = docSnap.data();
+      await setDoc(docRef, { quantity: quantity + 1 });
     } else {
-      await setDoc(docRef, { quantity: 1 })
+      await setDoc(docRef, { quantity: 1 });
     }
-    await updateInventory()
-  }
-  
+    await updateInventory();
+  };
+
   const removeItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
-    const docSnap = await getDoc(docRef)
+    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data()
+      const { quantity } = docSnap.data();
       if (quantity === 1) {
-        await deleteDoc(docRef)
+        await deleteDoc(docRef);
       } else {
-        await setDoc(docRef, { quantity: quantity - 1 })
+        await setDoc(docRef, { quantity: quantity - 1 });
       }
     }
-    await updateInventory()
-  }
+    await updateInventory();
+  };
+
   useEffect(() => {
     updateInventory();
   }, []);
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display={'flex'}
-      justifyContent={'center'}
-      flexDirection={'column'}
-      alignItems={'center'}
-      gap={2}
-    >
+    <Box className="container">
       <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Add Item
           </Typography>
-          <Stack width="100%" direction={'row'} spacing={2}>
+          <Stack width="100%" direction="row" spacing={2}>
             <TextField
               id="outlined-basic"
               label="Item"
@@ -108,9 +102,9 @@ export default function Home() {
             <Button
               variant="outlined"
               onClick={() => {
-                addItem(itemName)
-                setItemName('')
-                handleClose()
+                addItem(itemName);
+                setItemName('');
+                handleClose();
               }}
             >
               Add
@@ -121,45 +115,28 @@ export default function Home() {
       <Button variant="contained" onClick={handleOpen}>
         Add New Item
       </Button>
-      <Box border={'1px solid #333'}>
-        <Box
-          width="800px"
-          height="100px"
-          bgcolor={'pink'}
-          display={'flex'}
-          justifyContent={'center'}
-          alignItems={'center'}
-        >
-          <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
+      <Box className="inventory-container">
+        <Box className="inventory-header">
+          <Typography variant="h2" className="inventory-title">
             Inventory Items
           </Typography>
         </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
-          {inventory.map(({name, quantity}) => (
-            <Box
-              key={name}
-              width="100%"
-              minHeight="150px"
-              display={'flex'}
-              justifyContent={'space-between'}
-              alignItems={'center'}
-              bgcolor={'#f0f0f0'}
-              paddingX={5}
-            >
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
+        <Stack className="inventory-list">
+          {inventory.map(({ name, quantity }) => (
+            <Box key={name} className="inventory-item">
+              <Typography variant="h3" className="inventory-item-name">
                 {name.charAt(0).toUpperCase() + name.slice(1)}
               </Typography>
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
+              <Typography variant="h3" className="inventory-item-quantity">
                 Quantity: {quantity}
               </Typography>
-              <Button variant="contained" onClick={() => removeItem(name)}>
+              <Button variant="contained" color="secondary" onClick={() => removeItem(name)}>
                 Remove
               </Button>
             </Box>
           ))}
         </Stack>
       </Box>
-      
     </Box>
-  )
+  );
 }
