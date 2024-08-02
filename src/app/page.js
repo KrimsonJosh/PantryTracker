@@ -1,17 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material'
-import { firestore } from '@/firebase'
+import { useState, useEffect } from 'react';
+import { Box, Typography } from '@mui/material';
+import { firestore } from './firebase'; // Ensure this path is correct
+
 import {
   collection,
-  doc,
   getDocs,
-  query,
-  setDoc,
-  deleteDoc,
-  getDoc,
-} from 'firebase/firestore'
+  query
+} from 'firebase/firestore';
 
 const style = {
   position: 'absolute',
@@ -26,39 +23,38 @@ const style = {
   display: 'flex',
   flexDirection: 'column',
   gap: 3,
-}
+};
 
 export default function Home() {
-  const [inventory, setInventory] = useState([])
-  const [open, setOpen] = useState(false)
-  const [itemName, setItemName] = useState('')
+  const [inventory, setInventory] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [itemName, setItemName] = useState('');
 
   const updateInventory = async () => {
-    const snapshot = query(collection(firestore, 'inventory'))
-    const docs = await getDocs(snapshot)
-    const inventoryList = []
+    const snapshot = query(collection(firestore, 'inventory'));
+    const docs = await getDocs(snapshot);
+    const inventoryList = [];
     docs.forEach((doc) => {
-      inventoryList.push({ name: doc.id, ...doc.data() })
-    })
-    setInventory(inventoryList)
-  }
-  
+      inventoryList.push({ name: doc.id, ...doc.data() });
+    });
+    setInventory(inventoryList);
+  };
+
   useEffect(() => {
-    updateInventory()
-  }, [])
-  
+    updateInventory();
+  }, []);
+
   return (
     <Box>
       <Typography variant="h1">Inventory Management</Typography>
       {
-        inventory.forEach((item)=>{
-          return (<>
+        inventory.map((item) => ( // Use map instead of forEach for rendering
+          <div key={item.name}>
             {item.name}
             {item.count}
-            </>
-          )
-        })
+          </div>
+        ))
       }
     </Box>
-  )
+  );
 }
